@@ -1,0 +1,84 @@
+---
+title: "TidyTemplate"
+date: 2021-03-01
+output: html_output
+editor_options: 
+  chunk_output_type: inline
+---
+
+# TidyTuesday
+
+Join the R4DS Online Learning Community in the weekly \#TidyTuesday event! Every week we post a raw dataset, a chart or article related to that dataset, and ask you to explore the data. While the dataset will be "tamed", it will not always be tidy! As such you might need to apply various R for Data Science techniques to wrangle the data into a true tidy format. The goal of TidyTuesday is to apply your R skills, get feedback, explore other's work, and connect with the greater \#RStats community! As such we encourage everyone of all skills to participate!
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(tidytuesdayR)
+
+library(ggthemes)
+library(RColorBrewer)
+
+theme_set(theme_light())
+```
+
+# Load the weekly Data
+
+Dowload the weekly data and make available in the `tt` object.
+
+```{r Load}
+
+tt <- tt_load(2021, week = 10)
+
+```
+
+# Glimpse Data
+
+Take an initial look at the format of the data available.
+
+```{r Glimpse}
+
+tt %>% 
+  map(glimpse)
+
+youtube <- tt$youtube
+```
+
+# Wrangle
+
+Explore the data and process it into a nice format for plotting! Access each dataset by name by using a dollarsign after the `tt` object and then the name of the data set.
+
+```{r Wrangle}
+
+youtube %>% 
+  pivot_longer(cols = funny:use_sex, 
+               names_to = "kinds",
+               values_to = "value") %>% 
+  mutate(value = as.numeric(value)) %>% 
+  ggplot(aes(x = year, y = value )) +
+  geom_line()
+```
+
+# Visualize
+
+Using your processed dataset, create your unique visualization.
+
+```{r Visualize}
+
+
+  
+```
+
+# Save Image
+
+Save your image for sharing. Be sure to use the `#TidyTuesday` hashtag in your post on twitter!
+
+```{r}
+
+# This will save your most recent plot
+ggsave(
+  filename = "My TidyTuesday Plot.png",
+  device = "png")
+
+```

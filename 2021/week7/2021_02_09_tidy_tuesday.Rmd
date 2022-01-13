@@ -1,0 +1,228 @@
+---
+title: "TidyTemplate"
+date: 2021-02-14
+output: html_output
+---
+
+# TidyTuesday
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(tidytuesdayR)
+library(ggthemes)
+library(scales) # used to scale y axis for millions
+library(RColorBrewer)
+library(wesanderson)
+library(ggpubr)
+
+
+```
+
+# Load the weekly Data
+
+Download the weekly data and make available in the `tt` object.
+
+```{r Load}
+
+tt <- tt_load("2021-02-09")
+
+```
+
+
+# Readme
+
+Take a look at the readme for the weekly data to get insight on the dataset.
+This includes a data dictionary, source, and a link to an article on the data.
+
+```{r Readme, eval = interactive()}
+
+tt 
+```
+
+
+# Glimpse Data
+
+Take an initial look at the format of the data available.
+
+```{r Glimpse}
+
+tt %>% 
+  map(glimpse)
+
+```
+
+# Wrangle
+
+Explore the data and process it into a nice format for plotting! Access each dataset by name by using a dollarsign after the `tt` object and then the name of the data set.
+
+```{r Wrangle}
+
+lifetime_earn <- tt$lifetime_earn
+
+student_debt <- tt$student_debt
+
+student_debt %>%
+  count(year)
+
+retirement <- tt$retirement
+retirement %>% 
+  count(year)
+
+home_owner <- tt$home_owner
+home_owner %>% 
+  count(year)
+
+race_wealth <- tt$race_wealth
+race_wealth %>% 
+  count(year, type)
+```
+
+
+# Visualize
+
+Using your processed dataset, create your unique visualization.
+
+```{r Visualize}
+# Lifetime earn by race and gender
+plot1 <- lifetime_earn %>% 
+  ggplot(aes(x=race, y = lifetime_earn, fill = gender)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6)) +
+  labs(title = "Lifetime earn by race and gender",
+       y = "Lifetime earn",
+       x = "Race",
+       caption = "Data source: TidyTuesday week 7") +
+  theme(
+  # plot.title = element_text(hjust = 0.5, size = 12),    # Center title position and size
+    plot.caption = element_text(hjust = 1, face = "italic")# move caption to the left
+  ) + 
+  scale_fill_brewer(palette = "Dark2")
+
+# Average share of families with student loan debt by race
+plot2 <- student_debt %>% 
+  ggplot(aes(x = year, y = loan_debt_pct, color = race)) +
+  geom_line() 
+
+# Average family student loan debt per race from 1989 to 2016
+plot3 <- student_debt %>% 
+  ggplot(aes(x = year, y = loan_debt, color = race)) +
+  geom_line() +
+  scale_x_continuous(breaks = seq(1989, 2016, 3), 
+                     minor_breaks = 0) +
+  scale_y_continuous(labels = unit_format(unit = "k", scale = 1e-3)) +
+  labs(title = "Average family student loan debt per race from 1989 to 2016",
+       y = "Average faimly student loan debt",
+       x = " Year",
+       caption = "Data source: TidyTuesday week 7") +
+  theme(
+  #plot.title = element_text(hjust = 0.5, size = 12),    # Center title position and size
+    plot.caption = element_text(hjust = 1, face = "italic"),
+    legend.position = "none"# move caption to the left
+  ) 
+
+# Average family liquid retirement saving normalized to 2016 dollars
+plot4 <- retirement %>% 
+  ggplot(aes(x = year, y = retirement, color = race)) +
+  geom_line() +
+  scale_x_continuous(breaks = seq(1989, 2016, 3), 
+                     minor_breaks = 0) +
+  scale_y_continuous(labels = unit_format(unit = "k", scale = 1e-3)) +
+  labs(title = "Average family liquid retirement per race from 1989 to 2016",
+       subtitle = "Savings normalized to 2016 dollars",
+       y = "Average family liquid retirement",
+       x = " Year",
+       caption = "Data source: TidyTuesday week 7") +
+  theme(
+  # plot.title = element_text(hjust = 0.5, size = 12),    # Center title position and size
+    plot.caption = element_text(hjust = 1, face = "italic"),# move caption to the left
+    plot.subtitle = element_text(hjust = 0, size = 12, face = "italic"),
+    legend.position = "none"  ) 
+# difference just got larger and larger across years (white x black/hispanic)
+
+
+# Home ownership percentage for family per race from 1976 to 2016
+plot5 <- home_owner %>% 
+  ggplot(aes(x = year, y = home_owner_pct, color = race)) + 
+  geom_line() + 
+#  scale_x_continuous(breaks = seq(1976, 2016, 3))+
+  scale_y_continuous(labels = percent, 
+                     limits = c(0, 1)) +
+  labs(title = "Home ownership percentage for family per race from 1976 to 2016",
+       subtitle = "Savings normalized to 2016 dollars",
+       y = "Home ownership",
+       x = " Year") +
+  theme(
+  #plot.title = element_text(hjust = 0.5, size = 20),    # Center title position and size
+    plot.subtitle = element_text(hjust = 0, face = "italic"),
+    legend.position = "none") 
+# not much change in the difference between white and black/hispanic across the years
+  
+# Family wealth by race from 1963 to 2016
+plot6 <- race_wealth %>% 
+  ggplot(aes(x = year, y = wealth_family, color = race)) +
+  geom_line() +
+  facet_grid(type~.) +
+  scale_y_continuous(labels = unit_format(unit = "k", scale = 1e-3)) +
+    labs(title = "Family wealth by race from 1963 to 2016",
+       subtitle = "wealth normalized to 2016 dollars",
+       y = "Family wealth",
+       x = " Year",
+       caption = "Data source: TidyTuesday week 7") + 
+  theme(
+  # plot.title = element_text(hjust = 0.5, size = 20),    # Center title position and size
+    plot.caption = element_text(hjust = 1, face = "italic"),# move caption to the left
+    plot.subtitle = element_text(hjust = 0, face = "italic")  ) 
+# the difference in weath just got larger and larger between white and Black/Hispanic 
+
+plot7 <- race_wealth %>%
+  filter(type == "Average") %>% 
+  ggplot(aes(x = race, y = wealth_family, fill = race)) +
+  geom_boxplot(alpha = 0.5) +
+  geom_jitter() +
+  scale_fill_brewer(palette = "Dark2") +
+  scale_y_continuous(labels = unit_format(unit = "k", scale = 1e-3)) +
+    labs(title = "Family wealth by race from 1963 to 2016",
+       subtitle = "Wealth normalized to 2016 dollars, each dot is a different year, from 1963 to 2016",
+       y = "Family wealth",
+       x = " Year",
+       caption = "Data source: TidyTuesday week 7") + 
+  theme(
+   #plot.title = element_text(hjust = 0.5, size = 20),    # Center title position and size
+    plot.caption = element_text(hjust = 1, face = "italic"),# move caption to the left
+    plot.subtitle = element_text(hjust = 0, face = "italic"),
+    legend.position = "none") 
+  
+
+arrange1 <- 
+  ggarrange(plot1, plot2, plot3, plot4, 
+            labels = c("A", "B", "C", "D"),
+           ncol = 2, nrow = 2)
+
+arrange2 <- 
+  ggarrange(plot6,
+            ggarrange(plot5, plot7,ncol = 2, labels = c("B", "C")),
+            nrow = 2,
+            labels = "A"
+            )
+
+```
+
+
+# Save Image
+
+Save your image for sharing. Be sure to use the `#TidyTuesday` hashtag in your post on twitter! 
+
+```{r}
+
+ggsave(arrange1,
+  filename = "Week7/My TidyTuesday Plot1.png",
+  device = "png")
+
+ggsave(arrange2,
+  filename = "Week7/My TidyTuesday Plot2.png",
+  device = "png")
+
+```

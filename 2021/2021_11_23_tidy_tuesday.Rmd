@@ -1,0 +1,114 @@
+---
+title: "TidyTemplate"
+date: 2021-11-22
+output: html_output
+---
+
+# TidyTuesday
+
+
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(tidytuesdayR)
+library(lubridate)
+library(viridis)
+library(hrbrthemes)
+library(plotly)
+```
+
+# Load the weekly Data
+
+```{r Load}
+
+tt <- tt_load("2021-11-23")
+
+```
+
+
+# Readme
+
+Take a look at the readme for the weekly data to get insight on the dataset.
+This includes a data dictionary, source, and a link to an article on the data.
+
+```{r Readme, eval = interactive()}
+
+tt
+
+```
+
+
+# Glimpse Data
+
+```{r Glimpse}
+
+tt %>% 
+  map(glimpse)
+
+```
+
+
+```{r}
+
+episodes <- tt$episodes
+imdb <- tt$imdb
+
+episodes_clean <- episodes %>% 
+  rename(season = season_number,
+         ep_num = episode_number,
+         rating_ep = rating) %>% 
+  full_join(imdb) %>% 
+  rename(rating_imdb = rating)  %>% 
+  mutate(season = factor(season)) 
+
+
+episodes_clean %>% 
+  ggplot(aes(x = season, y = rating_imdb, group = season, fill = season)) + 
+  geom_boxplot() +
+  theme_bw()
+
+episodes_clean %>% 
+  #filter(season == 2)   %>%  
+  group_by(season) %>% 
+  summarize(first_episode = min(first_aired, na.rm = T),
+            last_episode  = max(first_aired, na.rm = T)) %>% 
+  mutate( year_first_ep = year(first_episode),
+          year_last_ep  = year(last_episode)) %>% 
+  filter(!is.na(season)) %>% 
+  ungroup() %>% 
+  ggplot(aes(x = year_first_ep))
+
+  
+p <- episodes_clean %>% 
+  filter(!is.na(season)) %>% 
+  mutate(text = paste("era: ", era, "\nepisode title: ", episode_title, "\nDuration: ", duration, "\nRating IMDB ", rating_imdb, sep="")) %>%
+  ggplot(aes(x = first_aired, y = season, color = season, text = text, size = rating_imdb^10)) +
+  geom_point(alpha = .5) +
+#    scale_color_viridis(discrete=TRUE, guide=FALSE) +
+#  scale_size(range = c(1, 19))
+  theme_minimal() +
+  scale_x_date( date_breaks = "1 year", date_labels = "%Y" )+
+  theme(legend.position = "none") +
+  labs(x = 'First Aired',
+       y = 'Season', 
+       title = "Dr. Who's First Aired by Season, sized by IMDB ratings") +
+  scale_color_viridis(discrete=TRUE, guide=FALSE) +
+    theme_ipsum() +
+    theme(legend.position="none") 
+  
+pp <- ggplotly(p, tooltip="text")
+  
+library(htmlwidgets)
+saveWidget(pp, file="ggplotlyBubblechart.html")
+# 
+imdb
+
+
+
+
+
+```
+

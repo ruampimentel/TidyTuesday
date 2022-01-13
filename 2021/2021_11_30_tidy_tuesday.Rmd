@@ -1,0 +1,129 @@
+---
+title: "TidyTemplate"
+date: 2021-11-30
+output: html_output
+---
+
+# TidyTuesday
+
+Join the R4DS Online Learning Community in the weekly #TidyTuesday event!
+Every week we post a raw dataset, a chart or article related to that dataset, and ask you to explore the data.
+While the dataset will be “tamed”, it will not always be tidy! As such you might need to apply various R for Data Science techniques to wrangle the data into a true tidy format.
+The goal of TidyTuesday is to apply your R skills, get feedback, explore other’s work, and connect with the greater #RStats community!
+As such we encourage everyone of all skills to participate!
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(tidytuesdayR)
+library(lubridate)
+library(forcats)
+library(RColorBrewer)
+
+```
+
+# Load the weekly Data
+
+Dowload the weekly data and make available in the `tt` object.
+
+```{r Load}
+
+tt <- tt_load("2021-11-30")
+
+```
+
+
+# Readme
+
+Take a look at the readme for the weekly data to get insight on the dataset.
+This includes a data dictionary, source, and a link to an article on the data.
+
+```{r Readme, eval = interactive()}
+
+matches <- tt$matches
+
+```
+
+
+# Glimpse Data
+
+Take an initial look at the format of the data available.
+
+```{r Glimpse}
+
+tt %>% 
+  map(glimpse)
+
+```
+
+# Wrangle
+
+Explore the data and process it into a nice format for plotting! Access each dataset by name by using a dollarsign after the `tt` object and then the name of the data set.
+
+```{r Wrangle}
+
+matches %>% select(match_date) %>% 
+  filter(!str_detect(match_date, "-")) %>% 
+  mutate( match_date = lubridate::mdy(match_date)) %>% 
+  count(match_date, sort = T)
+
+
+# GRAPH - Count of  Ground Country - Top 12 countries
+matches %>% #select(match_date) %>% 
+  filter(!str_detect(match_date, "-")) %>% 
+  mutate( match_date = lubridate::mdy(match_date),
+          ground_country = as.factor(ground_country)) %>%
+  count(ground_country, sort = T) %>% 
+  mutate(ground_country = fct_lump_n(ground_country, n =12, w = n),
+         ground_country = fct_reorder(ground_country, n)) %>% 
+  ggplot(aes(y = ground_country, x = n, fill = ground_country)) +
+  geom_bar(stat = "identity") +
+  theme_classic() +
+  theme(legend.position = "none") +
+  scale_fill_hue(h = c(150, 300))
+  scale_fill_brewer(palette = "Set3")
+
+# teams with more games and plays
+matches %>% 
+  select(team1, team2) %>% 
+  pivot_longer(c(team1, team2),
+               names_to = "team_order", 
+               values_to = "team") %>% 
+  count(team, sort = T) %>% 
+  mutate(team = (as.factor(team) %>% 
+                     fct_lump(., n = 12, w = n) %>% 
+                   fct_reorder(., n))) %>% 
+  ggplot(aes(y = team, x = n, fill = team)) +
+  geom_bar(stat = "identity") +
+  theme_classic() +
+  theme(legend.position = "none") +
+  scale_fill_hue(h = c(150, 300))
+
+RColorBrewer::display.brewer.all()
+```
+
+
+# Visualize
+
+Using your processed dataset, create your unique visualization.
+
+```{r Visualize}
+
+
+  
+```
+
+# Save Image
+
+Save your image for sharing. Be sure to use the `#TidyTuesday` hashtag in your post on twitter! 
+
+```{r}
+
+# This will save your most recent plot
+ggsave(
+  filename = "My TidyTuesday Plot.png",
+  device = "png")
+
+```

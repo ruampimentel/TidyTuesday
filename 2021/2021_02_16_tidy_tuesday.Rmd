@@ -1,0 +1,110 @@
+---
+title: "TidyTemplate"
+date: 2021-02-15
+output: html_output
+---
+
+# TidyTuesday
+
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(tidytuesdayR)
+
+library(ggthemes)
+
+library(RColorBrewer)
+library(scales)
+
+```
+
+# Load the weekly Data
+
+Dowload the weekly data and make available in the `tt` object.
+
+```{r Load}
+
+tt <- tt_load("2021-02-16")
+
+```
+
+
+# Readme
+
+Take a look at the readme for the weekly data to get insight on the dataset.
+This includes a data dictionary, source, and a link to an article on the data.
+
+```{r Readme, eval = interactive()}
+
+tt
+
+```
+
+
+# Glimpse Data
+
+Take an initial look at the format of the data available.
+
+```{r Glimpse}
+
+tt %>% 
+  map(glimpse)
+
+```
+
+# Wrangle
+
+Explore the data and process it into a nice format for plotting! Access each dataset by name by using a dollarsign after the `tt` object and then the name of the data set.
+
+```{r Wrangle}
+# stablishing the name of the font
+windowsFonts(ThisFont=windowsFont("B52-ULCW00-ULC"))
+
+
+# Challenge 1
+
+tt$georgia_pop %>% 
+  pivot_longer(cols = Colored:White,
+               names_to = "race",
+               values_to = "pop") %>% 
+  mutate( race = case_when(race == "Colored" ~ "COLORED",
+                           race == "White" ~ "WHITE")) %>% 
+  ggplot(aes(x = Year, y = pop)) +
+  geom_line(aes(linetype = race)) + 
+ # theme_light( ) +
+  scale_x_continuous(breaks = seq(1790, 1890, 10),
+                     minor_breaks = 0) +
+  scale_y_reverse(breaks = seq(0, 100, 5),
+                  minor_breaks = 0,
+                  limits = c(100,0)) +
+  scale_linetype(name = NULL) +
+  labs(y ="PERCENTS",
+       x = NULL,
+       title = "COMPARATIVE INCREASE OF WHITE AND COLORED 
+POPULATION OF GEORGIA.",
+        caption = "Dubois Visualization Challenge I   #DuBoisChallenge   #TidyTuesday   |   viz by @PimentelRuam") +
+  coord_flip() +
+  theme(panel.background = element_rect("#e8cfb3"),
+        plot.background = element_rect("#e8cfb3"),
+        legend.background = element_rect("#e8cfb3"),
+        legend.key = element_rect("#e8cfb3"),
+        legend.key.width = unit(5, "cm"),
+        plot.title = element_text(size = 16, 
+                                  hjust = 0.5,
+                                  family = "ThisFont"),
+        panel.grid = element_line(colour = "#dfaa8e"),
+        legend.position = "bottom",
+        legend.direction = "horizontal",
+        legend.spacing.x = unit(0, "cm"),
+        legend.text = element_text(family = "ThisFont"),
+        axis.title.x = element_text(family = "ThisFont"),
+        axis.ticks.length = unit(0, "cm"),
+        axis.text = element_text(family = "ThisFont"),
+        plot.caption = element_text(family = "ThisFont")) 
+  
+
+
+```
