@@ -1,10 +1,11 @@
 ---
 title: "TidyTemplate"
-date: 2022-01-13
+date: 2022-02-22
 output: html_output
 ---
 
 # TidyTuesday
+
 
 ```{r setup, include=FALSE}
 
@@ -12,15 +13,16 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
 library(tidytuesdayR)
-library(psych)
+
 ```
 
 # Load the weekly Data
 
+Dowload the weekly data and make available in the `tt` object.
 
 ```{r Load}
 
-tt <- tt_load("2022-01-11")
+tt <- tt_load("2022-02-22")
 
 ```
 
@@ -36,6 +38,7 @@ tt
 
 # Glimpse Data
 
+Take an initial look at the format of the data available.
 
 ```{r Glimpse}
 
@@ -46,11 +49,11 @@ tt %>%
 
 # Wrangle
 
+Explore the data and process it into a nice format for plotting! Access each dataset by name by using a dollarsign after the `tt` object and then the name of the data set.
 
 ```{r Wrangle}
 
-colony <- tt$colony
-stressor <- tt$stressor
+freedom <- tt$freedom
 
 ```
 
@@ -61,8 +64,7 @@ Using your processed dataset, create your unique visualization.
 
 ```{r Visualize}
 
-colony %>% describe() %>% 
-  as.tibble(rownames = "variables") 
+
   
 ```
 
