@@ -1,4 +1,5 @@
-# template created by gkaramanis, see original here:
+# template adapted from gkaramanis' template. 
+# See original here:
 # https://github.com/gkaramanis/tidytuesday/blob/master/newweek.R
 
 library(lubridate)
@@ -8,10 +9,11 @@ newscript <- readline(prompt = "Name of script: ")
 # Get date of next Tuesday
 i = wday(Sys.Date(), week_start = 1)
 next_tuesday <- Sys.Date() + (7 - i + 2) %% 7
+previous_tuesday <-  next_tuesday - 7 # I use previous because I'm always late hehe...
 
 # Get ISO week, create new week folder and plot subfolder
-which_week <- isoweek(next_tuesday)
-which_year <- isoyear(next_tuesday)
+which_week <- isoweek(previous_tuesday)
+which_year <- isoyear(previous_tuesday)
 
 folder <- paste0(paste0(which_year, "/"), paste0(which_year, "-week_"), formatC(which_week, width = 2, flag = "0")) 
 dir.create(file.path(paste0(folder, "/plots")), recursive = TRUE)
@@ -20,7 +22,7 @@ dir.create(file.path(paste0(folder, "/plots")), recursive = TRUE)
 readme <- paste0(folder, "/README.md")
 file.create(readme)
 readme_text <- paste0(
-  "https://github.com/rfordatascience/tidytuesday/tree/master/data/", which_year, "/", next_tuesday, "\n\n![](plots/",
+  "https://github.com/rfordatascience/tidytuesday/tree/master/data/", which_year, "/", previous_tuesday, "\n\n![](plots/",
   newscript,
   ".png)")
 write(as.character(readme_text), file(readme))
@@ -30,12 +32,14 @@ script_file <- paste0(folder, "/", newscript, ".R")
 file.create(script_file)
 script_text <- paste0(
   'library(tidyverse)', '\n',
-  'library(camcorder)',
+  'library(tidytuesdayR)',
   '\n\n',
-  'gg_record(dir = "temp", device = "png", width = 10, height = 8, units = "in", dpi = 320)',
+  'tt <- tt_load("', previous_tuesday, '")',
   '\n\n'
   
 )
+
+
 write(as.character(script_text), file(script_file))
 
 # Open script and start having fun!
