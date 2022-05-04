@@ -15,7 +15,9 @@ previous_tuesday <-  next_tuesday - 7 # I use previous because I'm always late h
 which_week <- isoweek(previous_tuesday)
 which_year <- isoyear(previous_tuesday)
 
-folder <- paste0(paste0(which_year, "/"), paste0(which_year, "-week_"), formatC(which_week, width = 2, flag = "0")) 
+folder <- paste0(paste0(which_year, "/"), 
+                 paste0(which_year, "-week_"), 
+                 formatC(which_week, width = 2, flag = "0")) 
 dir.create(file.path(paste0(folder, "/plots")), recursive = TRUE)
 
 # Create README 
